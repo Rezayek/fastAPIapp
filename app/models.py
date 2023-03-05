@@ -22,6 +22,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password =  Column(String, nullable=False)
+    user_name =  Column(String, nullable=False)
+    is_verified = Column(Boolean, server_default='False', nullable=False)
     created_at = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
     phone_number = Column(String)
     

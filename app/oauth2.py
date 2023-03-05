@@ -48,3 +48,31 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session =  Depends
     token_data = verify_access_token(token, cred_exception)
     user = db.query(models.User).filter(models.User.id == token_data.id).first()
     return user
+
+
+def verify_email_token(token: str, cred_exception):
+    try:
+        
+        payload = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+    
+        id : str = payload.get("user_id")
+        username = payload.get("username")
+        
+        if not id or not username  :
+            raise cred_exception
+        
+        
+        token_data = schemas.EmailVerificationToken(id = id, username= username)
+        
+        
+    except JWTError:
+        raise cred_exception
+    
+    
+    return token_data
+
+def get_unverified_user(token: str, db: Session =  Depends(database.get_db)):
+    cred_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
+    token_data = verify_email_token(token, cred_exception)
+    user = db.query(models.User).filter(models.User.id == token_data.id).first()
+    return user
